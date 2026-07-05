@@ -21,11 +21,14 @@ app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024  # 5 MB upload limit
 from ai_mentor import ai_mentor_bp
 app.register_blueprint(ai_mentor_bp)
 
+import os
+
 DB_CONFIG = {
-    "host":     "localhost",
-    "user":     "root",
-    "password": "",           # ← change if you have a MySQL password
-    "database": "placement_db"
+    "host": os.getenv("DB_HOST"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "database": os.getenv("DB_NAME"),
+    "port": int(os.getenv("DB_PORT", 3306))
 }
 
 def get_db():
