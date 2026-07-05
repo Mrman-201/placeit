@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}TPO Login — PlaceIt{% endblock %}
+{% block content %}
+<div style="min-height:90vh;background:linear-gradient(135deg,#0d0d18,#1e1b4b);display:flex;align-items:center;padding:3rem 0;position:relative;overflow:hidden;">
+  <div style="position:absolute;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(92,78,229,.2),transparent 70%);top:-100px;right:-100px;animation:float 8s ease-in-out infinite;"></div>
+  <div style="position:absolute;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,.15),transparent 70%);bottom:-80px;left:-80px;animation:float 10s ease-in-out infinite reverse;"></div>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5" style="position:relative;z-index:1;">
+        <div class="text-center mb-4 anim-fade-up">
+          <div style="width:64px;height:64px;border-radius:16px;background:rgba(92,78,229,.25);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;border:1px solid rgba(92,78,229,.4);">
+            <i class="bi bi-shield-check" style="color:#a78bfa;font-size:1.5rem;"></i>
+          </div>
+          <h2 style="font-size:1.7rem;font-weight:800;color:#fff;">TPO Portal</h2>
+          <p style="color:rgba(255,255,255,.5);">Placement Officer Access</p>
+        </div>
+        <div class="card p-4 p-md-5 anim-fade-up anim-d2" style="background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);">
+          <form method="POST">
+            <div class="mb-4">
+              <label class="form-label" style="color:rgba(255,255,255,.7);">Email Address</label>
+              <input name="email" type="email" class="form-control"
+                     style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff;"
+                     placeholder="officer@college.edu" required/>
+            </div>
+            <div class="mb-4">
+              <label class="form-label" style="color:rgba(255,255,255,.7);">Password</label>
+              <input name="password" type="password" class="form-control"
+                     style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12);color:#fff;"
+                     placeholder="••••••••" required/>
+            </div>
+            <button type="submit" class="btn-brand w-100 py-3" style="font-size:1rem;border-radius:var(--radius-sm);">
+              <i class="bi bi-shield-check me-2"></i>Login as TPO
+            </button>
+          </form>
+          <div class="text-center mt-4">
+            <p style="background:rgba(92,78,229,.15);border:1px solid rgba(92,78,229,.3);border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.82rem;color:#a78bfa;font-weight:600;margin:0;">
+              Demo: ramesh@college.edu / tpo123456
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

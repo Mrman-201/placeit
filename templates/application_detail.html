@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Application Detail — PlaceIt{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <a href="{{ url_for('my_applications') if session.get('role')=='student' else url_for('officer_dashboard') }}"
+       style="color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;">
+      <i class="bi bi-arrow-left me-1"></i>Back
+    </a>
+    <h1 style="margin-top:.75rem;">{{ app.role }}</h1>
+    <p>{{ app.company_name }} &mdash; Application #{{ app.application_id }}</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="row g-4">
+
+    <!-- LEFT -->
+    <div class="col-lg-4">
+
+      <!-- Application card -->
+      <div class="card p-4 mb-4">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">Application Info</h5>
+        <div style="display:flex;flex-direction:column;gap:.9rem;">
+          {% for label, val in [
+            ("Student", app.student_name),
+            ("Email", app.student_email),
+            ("Branch", app.branch),
+            ("CGPA", app.cgpa)
+          ] %}
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--muted);font-size:.85rem;">{{ label }}</span>
+            <span style="font-weight:600;font-size:.9rem;">{{ val }}</span>
+          </div>
+          {% endfor %}
+          <hr style="margin:.25rem 0;border-color:var(--border);">
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--muted);font-size:.85rem;">CTC</span>
+            <span style="font-weight:800;color:#065f46;">₹{{ "{:,.0f}".format(app.ctc) }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--muted);font-size:.85rem;">Drive Date</span>
+            <span style="font-weight:600;">{{ app.drive_date }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span style="color:var(--muted);font-size:.85rem;">Applied On</span>
+            <span style="font-weight:600;">{{ app.applied_date }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span style="color:var(--muted);font-size:.85rem;">Status</span>
+            {% set sc = app.status|lower|replace(' ','-') %}
+            <span class="status-badge s-{{ sc }}">{{ app.status }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Officer: Update Status -->
+      {% if session.get('role') == 'officer' %}
+      <div class="card p-4">
+        <h5 style="font-weight:800;margin-bottom:1rem;">Update Status</h5>
+        <form method="POST" action="{{ url_for('update_status', app_id=app.application_id) }}">
+          <div class="mb-3">
+            <select name="status" class="form-select">
+              {% for st in ['Applied','Shortlisted','In Process','Selected','Rejected'] %}
+              <option {{ 'selected' if app.status == st }}>{{ st }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <button type="submit" class="btn-brand w-100">
+            <i class="bi bi-arrow-repeat me-2"></i>Update
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-lg-8">
+
+      <!-- Status Timeline -->
+      <div class="card p-4 mb-4">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-clock-history me-2" style="color:var(--brand);"></i>Status Timeline
+        </h5>
+        <div class="timeline">
+          {% for h in history %}
+          <div class="t-item">
+            <div class="t-dot"></div>
+            <div class="t-card">
+              {% set sc = h.status|lower|replace(' ','-') %}
+              <span class="status-badge s-{{ sc }}">{{ h.status }}</span>
+              <div style="color:var(--muted);font-size:.8rem;margin-top:.4rem;">{{ h.updated_at }}</div>
+            </div>
+          </div>
+          {% else %}
+          <p style="color:var(--muted);">No history yet.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Selection Rounds -->
+      <div class="card p-4">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-layers me-2" style="color:var(--accent);"></i>Selection Rounds
+        </h5>
+        {% if rounds %}
+        <div style="display:flex;flex-direction:column;gap:.85rem;">
+          {% for r in rounds %}
+          <div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:1rem 1.25rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+              <div>
+                <div style="font-weight:700;">{{ r.round_name }}</div>
+                <div style="color:var(--muted);font-size:.82rem;margin-top:.2rem;">
+                  <span style="background:#f3f4f6;padding:.15em .5em;border-radius:4px;margin-right:.4rem;">{{ r.round_type }}</span>
+                  <i class="bi bi-calendar3 me-1"></i>{{ r.round_date }}
+                </div>
+                {% if r.remarks %}
+                <div style="color:var(--muted);font-size:.8rem;margin-top:.3rem;font-style:italic;">{{ r.remarks }}</div>
+                {% endif %}
+              </div>
+              {% if r.result == 'Pass' %}
+                <span style="background:#d1fae5;color:#065f46;font-weight:700;font-size:.82rem;padding:.4em .9em;border-radius:20px;white-space:nowrap;flex-shrink:0;">
+                  <i class="bi bi-check-circle me-1"></i>Pass
+                </span>
+              {% elif r.result == 'Fail' %}
+                <span style="background:#fee2e2;color:#991b1b;font-weight:700;font-size:.82rem;padding:.4em .9em;border-radius:20px;white-space:nowrap;flex-shrink:0;">
+                  <i class="bi bi-x-circle me-1"></i>Fail
+                </span>
+              {% else %}
+                <span style="background:#fef3c7;color:#b45309;font-weight:700;font-size:.82rem;padding:.4em .9em;border-radius:20px;white-space:nowrap;flex-shrink:0;">
+                  <i class="bi bi-hourglass-split me-1"></i>Pending
+                </span>
+              {% endif %}
+            </div>
+            {% if session.get('role') == 'officer' %}
+            <form method="POST" action="{{ url_for('update_round', round_id=r.round_id, student_id=app.student_id) }}"
+                  style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+              <select name="result" class="form-select" style="width:auto;font-size:.82rem;padding:.35rem .75rem;">
+                {% for opt in ['Pending','Pass','Fail'] %}
+                <option {{ 'selected' if r.result == opt }}>{{ opt }}</option>
+                {% endfor %}
+              </select>
+              <input name="remarks" type="text" class="form-control" placeholder="Remarks (optional)"
+                     value="{{ r.remarks or '' }}" style="flex:1;font-size:.82rem;padding:.35rem .75rem;min-width:120px;"/>
+              <button type="submit" class="btn-ghost" style="padding:.35rem .85rem;font-size:.8rem;white-space:nowrap;">
+                <i class="bi bi-arrow-repeat me-1"></i>Update
+              </button>
+            </form>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-3" style="color:var(--muted);">
+          <i class="bi bi-calendar-x" style="font-size:2rem;opacity:.3;"></i>
+          <p style="margin-top:.75rem;margin-bottom:0;">No rounds scheduled yet.</p>
+        </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

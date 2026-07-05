@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Student Login — PlaceIt{% endblock %}
+{% block extra_css %}
+<style>
+  .login-bg {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8f7ff 0%, #ede9fe 50%, #e0e7ff 100%);
+  }
+  .login-bg::before {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(92,78,229,.15), transparent 70%);
+    top: -100px; right: -100px;
+    animation: float 8s ease-in-out infinite;
+  }
+  .login-bg::after {
+    content: '';
+    position: absolute;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,.1), transparent 70%);
+    bottom: -80px; left: -80px;
+    animation: float 10s ease-in-out infinite reverse;
+  }
+</style>
+{% endblock %}
+{% block content %}
+<div class="login-bg">
+  <div class="container position-relative">
+    <div class="row justify-content-center">
+      <div class="col-md-5">
+        <div class="text-center mb-4 anim-fade-up">
+          <div style="width:64px;height:64px;border-radius:16px;background:var(--brand);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;">
+            <i class="bi bi-person-fill" style="color:#fff;font-size:1.5rem;"></i>
+          </div>
+          <h2 style="font-size:1.7rem;font-weight:800;">Welcome back</h2>
+          <p style="color:var(--muted);">Log in to your student account</p>
+        </div>
+        <div class="card p-4 p-md-5 anim-fade-up anim-d2 hover-glow">
+          <form method="POST">
+            <div class="mb-4">
+              <label class="form-label">Email Address</label>
+              <input name="email" type="email" class="form-control" placeholder="you@college.edu" required/>
+            </div>
+            <div class="mb-4">
+              <label class="form-label">Password</label>
+              <input name="password" type="password" class="form-control" placeholder="Your password" required/>
+            </div>
+            <button type="submit" class="btn-brand w-100 py-3" style="font-size:1rem;border-radius:var(--radius-sm);">
+              <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+            </button>
+          </form>
+          <div class="text-center mt-4">
+            <p style="color:var(--muted);margin-bottom:.4rem;">Don't have an account? <a href="{{ url_for('register') }}" style="color:var(--brand);font-weight:600;">Register</a></p>
+            <p style="background:var(--brand-light);border-radius:var(--radius-sm);padding:.6rem 1rem;font-size:.82rem;color:var(--brand);font-weight:600;margin:0;">
+              Demo: akash@student.com / student123
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

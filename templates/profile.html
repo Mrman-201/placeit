@@ -1,0 +1,323 @@
+{% extends "base.html" %}
+{% block title %}My Profile — PlaceIt{% endblock %}
+{% block extra_css %}
+<style>
+  .profile-hero {
+    background: linear-gradient(135deg, #0d0d18 0%, #1e1b4b 55%, #2e1065 100%);
+    padding: 3.5rem 0 5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 30% 40%, rgba(92, 78, 229, .25) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(245, 158, 11, .12) 0%, transparent 40%);
+  }
+
+  .avatar-ring {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand), #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 0 0 5px rgba(92, 78, 229, .3), 0 8px 32px rgba(0, 0, 0, .3);
+  }
+
+  .profile-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-md);
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .profile-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: .85rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .info-row:last-child {
+    border-bottom: none;
+  }
+
+  .info-label {
+    color: var(--muted);
+    font-size: .85rem;
+    font-weight: 500;
+  }
+
+  .info-value {
+    font-weight: 700;
+    font-size: .95rem;
+  }
+
+  .skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    font-size: .82rem;
+    font-weight: 600;
+    padding: .4em .9em;
+    border-radius: 20px;
+    transition: all .18s;
+  }
+
+  .skill-chip:hover {
+    background: var(--brand);
+    color: #fff;
+    transform: scale(1.05);
+  }
+
+  .cgpa-bar-wrap {
+    width: 100%;
+    height: 12px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: .5rem;
+  }
+
+  .cgpa-bar {
+    height: 100%;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--brand), #8b5cf6);
+    transition: width 1.2s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .mini-stat {
+    text-align: center;
+    padding: 1.25rem;
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .mini-stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--brand);
+    line-height: 1;
+  }
+
+  .mini-stat-label {
+    font-size: .75rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: .3rem;
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- PROFILE HERO -->
+<section class="profile-hero">
+  <div class="container position-relative">
+    <div class="d-flex align-items-center gap-4">
+      <div class="avatar-ring anim-fade-up">
+        {{ student.name[0] }}
+      </div>
+      <div class="anim-fade-up" style="animation-delay:.1s;">
+        <h1 style="color:#fff;font-size:2rem;font-weight:800;margin:0;">{{ student.name }}</h1>
+        <p style="color:rgba(255,255,255,.6);margin:.3rem 0 0;">
+          <i class="bi bi-mortarboard me-1"></i>{{ student.branch }} — Year {{ student.year }}
+        </p>
+        <div class="d-flex gap-2 mt-2">
+          <span style="background:rgba(92,78,229,.2);border:1px solid rgba(92,78,229,.4);color:#a78bfa;
+                       font-size:.78rem;font-weight:600;padding:.3em .8em;border-radius:20px;">
+            <i class="bi bi-person-badge me-1"></i>Student
+          </span>
+          <span style="background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.4);color:#34d399;
+                       font-size:.78rem;font-weight:600;padding:.3em .8em;border-radius:20px;">
+            <i class="bi bi-patch-check me-1"></i>ID #{{ student.student_id }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="container pb-5" style="margin-top:-2.5rem;">
+
+  <!-- QUICK STATS ROW -->
+  <div class="row g-3 mb-4 anim-fade-up" style="animation-delay:.15s;">
+    <div class="col-6 col-md-3">
+      <div class="mini-stat">
+        <div class="mini-stat-num">{{ "%.1f"|format(student.cgpa) }}</div>
+        <div class="mini-stat-label">CGPA</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="mini-stat">
+        <div class="mini-stat-num" style="color:var(--accent);">{{ student.backlogs }}</div>
+        <div class="mini-stat-label">Backlogs</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="mini-stat">
+        <div class="mini-stat-num" style="color:#3b82f6;">{{ total_apps }}</div>
+        <div class="mini-stat-label">Applications</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="mini-stat">
+        <div class="mini-stat-num" style="color:var(--success);">{{ selected }}</div>
+        <div class="mini-stat-label">Selected</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- LEFT COLUMN -->
+    <div class="col-lg-5">
+
+      <!-- ACADEMIC DETAILS -->
+      <div class="profile-card mb-4 anim-fade-up" style="animation-delay:.2s;">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-mortarboard-fill me-2" style="color:var(--brand);"></i>Academic Details
+        </h5>
+        <div class="info-row">
+          <span class="info-label">Branch</span>
+          <span class="info-value"><span class="branch-tag">{{ student.branch }}</span></span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Year</span>
+          <span class="info-value">{{ student.year }}<sup>{{ 'st' if student.year==1 else ('nd' if student.year==2 else
+              ('rd' if student.year==3 else 'th')) }}</sup> Year</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">CGPA</span>
+          <span class="info-value"
+            style="color:{% if student.cgpa >= 8.5 %}#065f46{% elif student.cgpa >= 7.0 %}#b45309{% else %}#991b1b{% endif %};">
+            {{ "%.1f"|format(student.cgpa) }} / 10.0
+          </span>
+        </div>
+        <div class="cgpa-bar-wrap">
+          <div class="cgpa-bar" id="cgpaBar" style="width:0%;"></div>
+        </div>
+        <div class="info-row" style="border-bottom:none;">
+          <span class="info-label">Active Backlogs</span>
+          <span class="info-value"
+            style="{% if student.backlogs > 0 %}color:#991b1b;{% else %}color:var(--success);{% endif %}">
+            {{ student.backlogs }}
+            {% if student.backlogs == 0 %}<i class="bi bi-check-circle ms-1"></i>{% endif %}
+          </span>
+        </div>
+      </div>
+
+      <!-- CONTACT INFO -->
+      <div class="profile-card anim-fade-up" style="animation-delay:.3s;">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-envelope-fill me-2" style="color:var(--accent);"></i>Contact Information
+        </h5>
+        <div class="info-row">
+          <span class="info-label">Email</span>
+          <span class="info-value" style="font-size:.88rem;">{{ student.email }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Phone</span>
+          <span class="info-value">{{ student.phone }}</span>
+        </div>
+        {% if student.city %}
+        <div class="info-row">
+          <span class="info-label">City</span>
+          <span class="info-value">{{ student.city }}</span>
+        </div>
+        {% endif %}
+        {% if student.state %}
+        <div class="info-row" style="border-bottom:none;">
+          <span class="info-label">State</span>
+          <span class="info-value">{{ student.state }}</span>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="col-lg-7">
+
+      <!-- SKILLS -->
+      <div class="profile-card mb-4 anim-fade-up" style="animation-delay:.25s;">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-lightning-fill me-2" style="color:#f59e0b;"></i>Skills
+        </h5>
+        {% if skills %}
+        <div class="d-flex flex-wrap gap-2">
+          {% for skill in skills %}
+          <span class="skill-chip">
+            <i class="bi bi-check2-circle" style="font-size:.75rem;"></i>{{ skill }}
+          </span>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:var(--muted);margin:0;">No skills added yet.</p>
+        {% endif %}
+      </div>
+
+      <!-- PLACEMENT SUMMARY -->
+      <div class="profile-card anim-fade-up" style="animation-delay:.35s;">
+        <h5 style="font-weight:800;margin-bottom:1.25rem;">
+          <i class="bi bi-graph-up me-2" style="color:var(--success);"></i>Placement Summary
+        </h5>
+        <div class="row g-3">
+          <div class="col-6">
+            <div
+              style="background:var(--brand-light);border-radius:var(--radius-sm);padding:1.25rem;text-align:center;">
+              <div style="font-size:2rem;font-weight:800;color:var(--brand);">{{ total_apps }}</div>
+              <div style="font-size:.78rem;font-weight:600;color:var(--brand-dark);text-transform:uppercase;">Total
+                Applied</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div style="background:#d1fae5;border-radius:var(--radius-sm);padding:1.25rem;text-align:center;">
+              <div style="font-size:2rem;font-weight:800;color:#065f46;">{{ selected }}</div>
+              <div style="font-size:.78rem;font-weight:600;color:#065f46;text-transform:uppercase;">Selected 🎉</div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 mt-3">
+          <a href="{{ url_for('my_applications') }}" class="btn-brand"
+            style="flex:1;text-align:center;text-decoration:none;">
+            <i class="bi bi-file-text me-2"></i>View Applications
+          </a>
+          <a href="{{ url_for('drives') }}" class="btn-outline-brand"
+            style="flex:1;text-align:center;text-decoration:none;">
+            <i class="bi bi-briefcase me-2"></i>Browse Drives
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  // Animate CGPA bar on load
+  setTimeout(() => {
+    document.getElementById('cgpaBar').style.width = '{{ (student.cgpa / 10 * 100)|round|int }}%';
+  }, 300);
+</script>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My Applications — PlaceIt{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}" style="color:rgba(255,255,255,.5);text-decoration:none;">Dashboard</a></li><li class="breadcrumb-item active">My Applications</li></ol></nav>
+    <h1>My Applications</h1>
+    <p>Track all your placement drive applications in one place</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  {% if apps %}
+  <div class="table-wrapper">
+    <table class="table styled-table table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Role & Company</th>
+          <th>Industry</th>
+          <th>CTC</th>
+          <th>Drive Date</th>
+          <th>Applied On</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in apps %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td>
+            <div style="font-weight:700;">{{ a.role }}</div>
+            <div style="color:var(--muted);font-size:.82rem;">{{ a.company_name }}</div>
+          </td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ a.industry }}</td>
+          <td style="font-weight:700;color:#065f46;">₹{{ "{:,.0f}".format(a.ctc) }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ a.drive_date }}</td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ a.applied_date }}</td>
+          <td>
+            {% set sc = a.status|lower|replace(' ','-') %}
+            <span class="status-badge s-{{ sc }}">{{ a.status }}</span>
+          </td>
+          <td>
+            <a href="{{ url_for('application_detail', app_id=a.application_id) }}"
+               class="btn-ghost" style="padding:.35rem .85rem;font-size:.8rem;text-decoration:none;border-radius:var(--radius-sm);">
+              View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card p-5 text-center">
+    <i class="bi bi-inbox" style="font-size:3rem;color:var(--border);"></i>
+    <h5 style="margin-top:1rem;font-weight:700;">No applications yet</h5>
+    <p style="color:var(--muted);">Browse drives and apply to get started.</p>
+    <a href="{{ url_for('drives') }}" class="btn-brand" style="width:fit-content;margin:0 auto;">Browse Drives</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

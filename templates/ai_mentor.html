@@ -1,0 +1,766 @@
+{% extends "base.html" %}
+{% block title %}AI Placement Mentor — PlaceIt{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* ── UPLOAD AREA ─────────────────────── */
+  .upload-zone {
+    border: 2.5px dashed var(--border);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    transition: all .25s;
+    cursor: pointer;
+    position: relative;
+    background: var(--card-bg);
+  }
+
+  .upload-zone:hover,
+  .upload-zone.dragover {
+    border-color: var(--brand);
+    background: var(--brand-light);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(92, 78, 229, .12);
+  }
+
+  .upload-zone .upload-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand-light), #e0dbff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.25rem;
+    font-size: 2rem;
+    color: var(--brand);
+    transition: transform .3s;
+  }
+
+  .upload-zone:hover .upload-icon {
+    transform: scale(1.1) rotate(-5deg);
+  }
+
+  .file-info {
+    display: none;
+    align-items: center;
+    gap: .75rem;
+    background: #d1fae5;
+    color: #065f46;
+    padding: .75rem 1.25rem;
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: .9rem;
+    margin-top: 1rem;
+  }
+
+  .file-info.show {
+    display: inline-flex;
+  }
+
+  /* ── LOADING OVERLAY ────────────────── */
+  .loading-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(13, 13, 24, .75);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+  }
+
+  .loading-overlay.show {
+    display: flex;
+  }
+
+  .spinner-ring {
+    width: 64px;
+    height: 64px;
+    border: 5px solid rgba(255, 255, 255, .15);
+    border-top-color: var(--brand);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .loading-text {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    max-width: 320px;
+  }
+
+  .loading-sub {
+    color: rgba(255, 255, 255, .5);
+    font-size: .85rem;
+    margin-top: .35rem;
+  }
+
+  /* ── SCORE RING ─────────────────────── */
+  .score-ring-wrap {
+    width: 160px;
+    height: 160px;
+    position: relative;
+    margin: 0 auto;
+  }
+
+  .score-ring-wrap svg {
+    transform: rotate(-90deg);
+  }
+
+  .score-ring-bg {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 10;
+  }
+
+  .score-ring-fill {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1.5s cubic-bezier(.22, 1, .36, 1);
+  }
+
+  .score-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .score-num {
+    font-size: 2.8rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+
+  .score-label {
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    margin-top: .25rem;
+  }
+
+  /* ── RESULT SECTION CARDS ───────────── */
+  .result-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    box-shadow: var(--shadow-sm);
+    transition: transform .2s, box-shadow .2s;
+  }
+
+  .result-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .result-card h3 {
+    font-size: 1.15rem;
+    font-weight: 800;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .result-card h3 .icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* Section icon colors */
+  .ic-score {
+    background: #ede9fe;
+    color: #7c3aed;
+  }
+
+  .ic-summary {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .ic-roles {
+    background: #d1fae5;
+    color: #059669;
+  }
+
+  .ic-strengths {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .ic-missing {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .ic-roadmap {
+    background: #e0e7ff;
+    color: #4338ca;
+  }
+
+  .ic-projects {
+    background: #fce7f3;
+    color: #db2777;
+  }
+
+  .ic-certs {
+    background: #ccfbf1;
+    color: #0d9488;
+  }
+
+  .ic-companies {
+    background: #f3e8ff;
+    color: #9333ea;
+  }
+
+  .ic-resume {
+    background: #fef9c3;
+    color: #a16207;
+  }
+
+  .ic-tips {
+    background: #cffafe;
+    color: #0891b2;
+  }
+
+  /* Content styling — rendered markdown */
+  .result-card .section-body {
+    font-size: .92rem;
+    line-height: 1.75;
+    color: #374151;
+  }
+
+  .result-card .section-body strong {
+    color: var(--text);
+  }
+
+  .result-card .section-body em {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .result-card .section-body ul,
+  .result-card .section-body ol {
+    padding-left: 1.25rem;
+    margin: .75rem 0;
+  }
+
+  .result-card .section-body li {
+    margin-bottom: .5rem;
+  }
+
+  .result-card .section-body li::marker {
+    color: var(--brand);
+  }
+
+  .result-card .section-body h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-top: 1.5rem;
+    margin-bottom: .75rem;
+    padding-bottom: .4rem;
+    border-bottom: 2px solid var(--brand-light);
+    display: block;
+  }
+
+  .result-card .section-body h4 {
+    font-size: .95rem;
+    font-weight: 700;
+    margin-top: 1.25rem;
+    margin-bottom: .5rem;
+    color: var(--brand-dark);
+  }
+
+  .result-card .section-body p {
+    margin-bottom: .6rem;
+  }
+
+  .result-card .section-body code {
+    background: var(--brand-light);
+    color: var(--brand-dark);
+    padding: .15em .45em;
+    border-radius: 4px;
+    font-size: .85em;
+  }
+
+  .result-card .section-body pre {
+    background: #1e1b4b;
+    color: #e0dbff;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    font-size: .82rem;
+    margin: .75rem 0;
+  }
+
+  .result-card .section-body pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+
+  .result-card .section-body blockquote {
+    border-left: 3px solid var(--brand);
+    padding-left: 1rem;
+    margin: .75rem 0;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .result-card .section-body hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.25rem 0;
+  }
+
+  /* ── PROFILE SIDEBAR ────────────────── */
+  .profile-mini {
+    background: linear-gradient(135deg, #0d0d18, #1e1b4b);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    color: #fff;
+    position: sticky;
+    top: 84px;
+  }
+
+  .profile-mini .pm-label {
+    font-size: .72rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: rgba(255, 255, 255, .45);
+    margin-bottom: .2rem;
+  }
+
+  .profile-mini .pm-value {
+    font-weight: 700;
+    font-size: .95rem;
+    margin-bottom: 1rem;
+  }
+
+  .pm-skill-chip {
+    display: inline-block;
+    background: rgba(92, 78, 229, .25);
+    border: 1px solid rgba(92, 78, 229, .4);
+    color: #a78bfa;
+    font-size: .72rem;
+    font-weight: 600;
+    padding: .2em .65em;
+    border-radius: 12px;
+    margin: .15rem .1rem;
+  }
+
+  /* ── RESPONSIVE ────────────────────── */
+  @media (max-width: 768px) {
+    .upload-zone {
+      padding: 2rem 1rem;
+    }
+
+    .score-ring-wrap {
+      width: 130px;
+      height: 130px;
+    }
+
+    .score-num {
+      font-size: 2.2rem;
+    }
+
+    .result-card {
+      padding: 1.5rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('dashboard') }}"
+            style="color:rgba(255,255,255,.5);text-decoration:none;">Dashboard</a></li>
+        <li class="breadcrumb-item active">AI Placement Mentor</li>
+      </ol>
+    </nav>
+    <h1><i class="bi bi-robot me-2"></i>AI Placement Mentor</h1>
+    <p>Upload your resume and get personalised career guidance powered by AI</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  {% if not results %}
+  <!-- ═══════════════════════════════════════════ -->
+  <!--  UPLOAD STATE                               -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <div class="result-card anim-fade-up">
+
+        <div class="text-center mb-4">
+          <span style="background:var(--brand-light);color:var(--brand);font-size:.78rem;font-weight:700;
+              padding:.4em 1em;border-radius:20px;text-transform:uppercase;letter-spacing:.5px;">
+            <i class="bi bi-stars me-1"></i>AI-Powered Analysis
+          </span>
+        </div>
+
+        <form id="uploadForm" action="{{ url_for('ai_mentor.ai_mentor_analyze') }}" method="POST"
+          enctype="multipart/form-data">
+
+          <!-- Drop Zone -->
+          <div class="upload-zone" id="dropZone" onclick="document.getElementById('fileInput').click();">
+            <div class="upload-icon">
+              <i class="bi bi-cloud-arrow-up"></i>
+            </div>
+            <h4 style="font-weight:800;margin-bottom:.5rem;">Drop your resume here</h4>
+            <p style="color:var(--muted);margin-bottom:1rem;font-size:.9rem;">
+              or click to browse files
+            </p>
+            <span style="background:var(--surface);border:1px solid var(--border);
+                padding:.4em 1.2em;border-radius:20px;font-size:.8rem;font-weight:600;color:var(--muted);">
+              <i class="bi bi-file-earmark-pdf me-1" style="color:#ef4444;"></i>
+              PDF only &bull; Max 5 MB
+            </span>
+            <input type="file" name="resume" id="fileInput" accept=".pdf" style="display:none;"
+              onchange="handleFile(this);">
+          </div>
+
+          <!-- File info (shown after selection) -->
+          <div class="file-info" id="fileInfo">
+            <i class="bi bi-file-earmark-pdf-fill" style="font-size:1.3rem;"></i>
+            <span id="fileName">resume.pdf</span>
+            <span style="margin-left:auto;font-size:.8rem;opacity:.7;" id="fileSize"></span>
+            <button type="button" onclick="clearFile();"
+              style="background:none;border:none;color:#991b1b;cursor:pointer;font-size:1.1rem;margin-left:.5rem;">
+              <i class="bi bi-x-circle-fill"></i>
+            </button>
+          </div>
+
+          <!-- Submit -->
+          <div class="text-center mt-4">
+            <button type="submit" class="btn-brand" id="analyzeBtn" disabled
+              style="padding:.75rem 2.5rem;font-size:1rem;border-radius:12px;">
+              <i class="bi bi-magic me-2"></i>Analyze My Resume
+            </button>
+          </div>
+        </form>
+
+        <!-- Features list -->
+        <div class="row g-3 mt-4 pt-3" style="border-top:1px solid var(--border);">
+          <div class="col-sm-4 text-center">
+            <i class="bi bi-graph-up-arrow" style="font-size:1.5rem;color:var(--brand);"></i>
+            <div style="font-weight:700;font-size:.82rem;margin-top:.4rem;">Resume Score</div>
+            <div style="color:var(--muted);font-size:.75rem;">Score out of 100</div>
+          </div>
+          <div class="col-sm-4 text-center">
+            <i class="bi bi-map" style="font-size:1.5rem;color:var(--success);"></i>
+            <div style="font-weight:700;font-size:.82rem;margin-top:.4rem;">Learning Roadmap</div>
+            <div style="color:var(--muted);font-size:.75rem;">30/60/90 day plan</div>
+          </div>
+          <div class="col-sm-4 text-center">
+            <i class="bi bi-building" style="font-size:1.5rem;color:var(--accent);"></i>
+            <div style="font-weight:700;font-size:.82rem;margin-top:.4rem;">Company Match</div>
+            <div style="color:var(--muted);font-size:.75rem;">Personalised targets</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <!-- ═══════════════════════════════════════════ -->
+  <!--  RESULTS STATE                              -->
+  <!-- ═══════════════════════════════════════════ -->
+  <div class="row g-4">
+
+    <!-- LEFT: Profile Sidebar -->
+    <div class="col-lg-3">
+      <div class="profile-mini anim-fade-up">
+        <div style="width:56px;height:56px;border-radius:50%;
+            background:linear-gradient(135deg,var(--brand),#8b5cf6);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:1.25rem;">
+          {{ profile.name[0] }}
+        </div>
+        <div style="font-weight:800;font-size:1.1rem;margin-bottom:.2rem;">{{ profile.name }}</div>
+        <div style="color:rgba(255,255,255,.5);font-size:.82rem;margin-bottom:1.5rem;">
+          {{ profile.branch }} — Year {{ profile.year }}
+        </div>
+
+        <div class="pm-label">CGPA</div>
+        <div class="pm-value">{{ "%.1f"|format(profile.cgpa) }} / 10.0</div>
+
+        <div class="pm-label">Backlogs</div>
+        <div class="pm-value">{{ profile.backlogs }}</div>
+
+        <div class="pm-label">Skills</div>
+        <div style="margin-bottom:1rem;">
+          {% for skill in profile.skills %}
+          <span class="pm-skill-chip">{{ skill }}</span>
+          {% endfor %}
+          {% if not profile.skills %}
+          <span style="color:rgba(255,255,255,.4);font-size:.82rem;">None listed</span>
+          {% endif %}
+        </div>
+
+        <div class="pm-label">Applications</div>
+        <div class="pm-value">{{ profile.applications|length }}</div>
+
+        <a href="{{ url_for('ai_mentor.ai_mentor_page') }}"
+          class="btn-brand d-block text-center text-decoration-none mt-3" style="font-size:.85rem;padding:.6rem 1rem;">
+          <i class="bi bi-arrow-repeat me-1"></i>Analyze Again
+        </a>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="col-lg-9">
+
+      <!-- ── SCORE CARD ── -->
+      <div class="result-card mb-4 anim-fade-up anim-d1">
+        <div class="row align-items-center">
+          <div class="col-md-4 text-center mb-3 mb-md-0">
+            <div class="score-ring-wrap">
+              <svg width="100%" height="100%" viewBox="0 0 160 160">
+                <circle class="score-ring-bg" cx="80" cy="80" r="68" />
+                <circle class="score-ring-fill" id="scoreRing" cx="80" cy="80" r="68" stroke-dasharray="427.26"
+                  stroke-dashoffset="427.26"
+                  style="stroke:{% if sections.score_number >= 80 %}var(--success){% elif sections.score_number >= 60 %}var(--accent){% elif sections.score_number >= 40 %}#f97316{% else %}var(--danger){% endif %};" />
+              </svg>
+              <div class="score-center">
+                <div class="score-num"
+                  style="color:{% if sections.score_number >= 80 %}var(--success){% elif sections.score_number >= 60 %}var(--accent){% elif sections.score_number >= 40 %}#f97316{% else %}var(--danger){% endif %};">
+                  {{ sections.score_number }}
+                </div>
+                <div class="score-label">out of 100</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-8">
+            <h3>
+              <span class="icon-circle ic-score"><i class="bi bi-bar-chart-fill"></i></span>
+              Overall Resume Score
+            </h3>
+            <div class="section-body md-content">{{ sections.resume_score }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CAREER SUMMARY ── -->
+      <div class="result-card mb-4 anim-fade-up anim-d2">
+        <h3>
+          <span class="icon-circle ic-summary"><i class="bi bi-person-lines-fill"></i></span>
+          Career Summary
+        </h3>
+        <div class="section-body md-content">{{ sections.career_summary }}</div>
+      </div>
+
+      <!-- ── BEST SUITABLE ROLES ── -->
+      <div class="result-card mb-4 anim-fade-up anim-d3">
+        <h3>
+          <span class="icon-circle ic-roles"><i class="bi bi-bullseye"></i></span>
+          Best Suitable Roles
+        </h3>
+        <div class="section-body md-content">{{ sections.suitable_roles }}</div>
+      </div>
+
+      <!-- ── STRENGTHS & MISSING SKILLS (side by side) ── -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-6 anim-fade-up anim-d4">
+          <div class="result-card h-100">
+            <h3>
+              <span class="icon-circle ic-strengths"><i class="bi bi-lightning-charge-fill"></i></span>
+              Strengths
+            </h3>
+            <div class="section-body md-content">{{ sections.strengths }}</div>
+          </div>
+        </div>
+        <div class="col-md-6 anim-fade-up anim-d5">
+          <div class="result-card h-100">
+            <h3>
+              <span class="icon-circle ic-missing"><i class="bi bi-exclamation-triangle-fill"></i></span>
+              Missing Technical Skills
+            </h3>
+            <div class="section-body md-content">{{ sections.missing_skills }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── LEARNING ROADMAP ── -->
+      <div class="result-card mb-4 anim-fade-up anim-d6">
+        <h3>
+          <span class="icon-circle ic-roadmap"><i class="bi bi-map-fill"></i></span>
+          Personalized Learning Roadmap
+        </h3>
+        <div class="section-body md-content">{{ sections.learning_roadmap }}</div>
+      </div>
+
+      <!-- ── RECOMMENDED PROJECTS ── -->
+      <div class="result-card mb-4 anim-fade-up">
+        <h3>
+          <span class="icon-circle ic-projects"><i class="bi bi-code-slash"></i></span>
+          Recommended Projects
+        </h3>
+        <div class="section-body md-content">{{ sections.projects }}</div>
+      </div>
+
+      <!-- ── CERTIFICATIONS ── -->
+      <div class="result-card mb-4 anim-fade-up">
+        <h3>
+          <span class="icon-circle ic-certs"><i class="bi bi-award-fill"></i></span>
+          Recommended Certifications
+        </h3>
+        <div class="section-body md-content">{{ sections.certifications }}</div>
+      </div>
+
+      <!-- ── COMPANIES TO TARGET ── -->
+      <div class="result-card mb-4 anim-fade-up">
+        <h3>
+          <span class="icon-circle ic-companies"><i class="bi bi-building"></i></span>
+          Companies to Target
+        </h3>
+        <div class="section-body md-content">{{ sections.companies }}</div>
+      </div>
+
+      <!-- ── RESUME IMPROVEMENTS ── -->
+      <div class="result-card mb-4 anim-fade-up">
+        <h3>
+          <span class="icon-circle ic-resume"><i class="bi bi-pencil-square"></i></span>
+          Resume Improvement Suggestions
+        </h3>
+        <div class="section-body md-content">{{ sections.resume_improvements }}</div>
+      </div>
+
+      <!-- ── PLACEMENT TIPS ── -->
+      <div class="result-card mb-4 anim-fade-up">
+        <h3>
+          <span class="icon-circle ic-tips"><i class="bi bi-mortarboard-fill"></i></span>
+          Placement Preparation Tips
+        </h3>
+        <div class="section-body md-content">{{ sections.placement_tips }}</div>
+      </div>
+
+    </div><!-- /col-lg-9 -->
+  </div><!-- /row -->
+  {% endif %}
+
+</div><!-- /container -->
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-ring"></div>
+  <div>
+    <div class="loading-text"><i class="bi bi-robot me-2"></i>AI is analyzing your resume…</div>
+    <div class="loading-sub">This usually takes 15–30 seconds. Please wait.</div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  // ── Drag & Drop ──
+  const dropZone = document.getElementById('dropZone');
+  const fileInput = document.getElementById('fileInput');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileName = document.getElementById('fileName');
+  const fileSize = document.getElementById('fileSize');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+  const form = document.getElementById('uploadForm');
+  const overlay = document.getElementById('loadingOverlay');
+
+  if (dropZone) {
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(evt => {
+      dropZone.addEventListener(evt, e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+    });
+    dropZone.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files.length) {
+        fileInput.files = files;
+        handleFile(fileInput);
+      }
+    });
+  }
+
+  function handleFile(input) {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+      alert('Please select a PDF file.');
+      input.value = '';
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File exceeds 5 MB limit.');
+      input.value = '';
+      return;
+    }
+    fileName.textContent = file.name;
+    fileSize.textContent = (file.size / 1024).toFixed(0) + ' KB';
+    fileInfo.classList.add('show');
+    analyzeBtn.disabled = false;
+  }
+
+  function clearFile() {
+    fileInput.value = '';
+    fileInfo.classList.remove('show');
+    analyzeBtn.disabled = true;
+  }
+
+  // ── Show loading overlay on submit ──
+  if (form) {
+    form.addEventListener('submit', () => {
+      overlay.classList.add('show');
+    });
+  }
+
+  // ── Animate score ring ──
+  const scoreRing = document.getElementById('scoreRing');
+  if (scoreRing) {
+    const score = {{ sections.score_number if results else 0 }};
+    const circumference = 2 * Math.PI * 68;  // r=68
+    const offset = circumference - (score / 100) * circumference;
+    setTimeout(() => { scoreRing.style.strokeDashoffset = offset; }, 400);
+  }
+
+  // ── Render Markdown in all section bodies ──
+  if (typeof marked !== 'undefined') {
+    marked.setOptions({ breaks: true, gfm: true });
+    document.querySelectorAll('.md-content').forEach(el => {
+      const raw = el.textContent;
+      if (raw.trim()) {
+        el.innerHTML = marked.parse(raw);
+      }
+    });
+  }
+</script>
+{% endblock %}

@@ -1,0 +1,423 @@
+{% extends "base.html" %}
+{% block title %}PlaceIt — Campus Placement Portal{% endblock %}
+{% block extra_css %}
+<style>
+  .hero {
+    background: linear-gradient(135deg, #0d0d18 0%, #1e1b4b 55%, #2e1065 100%);
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 50%, rgba(92,78,229,.18) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(245,158,11,.1) 0%, transparent 40%);
+  }
+  .hero-grid {
+    position: absolute;
+    inset: 0;
+    background-image: linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  /* Animated floating orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: .3;
+    animation: orbFloat 8s ease-in-out infinite;
+  }
+  .orb-1 {
+    width: 300px; height: 300px;
+    background: #5c4ee5;
+    top: 10%; left: 5%;
+    animation-delay: 0s;
+  }
+  .orb-2 {
+    width: 200px; height: 200px;
+    background: #f59e0b;
+    top: 60%; right: 10%;
+    animation-delay: -3s;
+    animation-duration: 10s;
+  }
+  .orb-3 {
+    width: 250px; height: 250px;
+    background: #8b5cf6;
+    bottom: 5%; left: 40%;
+    animation-delay: -5s;
+    animation-duration: 12s;
+  }
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33%      { transform: translate(30px, -20px) scale(1.05); }
+    66%      { transform: translate(-20px, 15px) scale(.95); }
+  }
+
+  .hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: rgba(92,78,229,.2);
+    border: 1px solid rgba(92,78,229,.4);
+    color: #a78bfa;
+    font-size: .8rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: .4rem 1rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-size: clamp(2.8rem, 5.5vw, 4.5rem);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.08;
+    letter-spacing: -1px;
+  }
+  .hero h1 .highlight {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    color: #f59e0b;
+    position: relative;
+  }
+  /* Typewriter cursor */
+  .typewriter-cursor {
+    display: inline-block;
+    width: 3px;
+    height: .85em;
+    background: #f59e0b;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: blink .7s step-end infinite;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+  .hero p {
+    color: rgba(255,255,255,.6);
+    font-size: 1.1rem;
+    line-height: 1.7;
+    max-width: 520px;
+    margin: 1.5rem 0 2.5rem;
+  }
+  .hero-cta { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn-hero-primary {
+    background: var(--brand);
+    color: #fff;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: .85rem 2rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    transition: all .2s;
+    box-shadow: 0 8px 24px rgba(92,78,229,.35);
+  }
+  .btn-hero-primary:hover {
+    background: #4338ca;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(92,78,229,.45);
+  }
+  .btn-hero-secondary {
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: .85rem 2rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,.15);
+    transition: all .2s;
+  }
+  .btn-hero-secondary:hover {
+    background: rgba(255,255,255,.14);
+    color: #fff;
+  }
+
+  /* floating stats — frosted glass chips */
+  .float-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .fstat {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform .25s, box-shadow .25s;
+  }
+  .fstat:hover {
+    transform: translateX(-6px) translateY(-2px);
+    box-shadow: 0 8px 32px rgba(92,78,229,.2);
+  }
+  .fstat-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+  .fstat-num { font-size: 1.6rem; font-weight: 800; color: #fff; line-height: 1; }
+  .fstat-label { font-size: .78rem; color: rgba(255,255,255,.5); font-weight: 500; margin-top: .15rem; }
+
+  /* how it works */
+  .step-num {
+    width: 52px; height: 52px;
+    border-radius: 14px;
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: 1.25rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-shrink: 0;
+  }
+
+  /* company logos strip */
+  .companies-strip {
+    overflow: hidden;
+    position: relative;
+  }
+  .companies-strip::before,
+  .companies-strip::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    z-index: 2;
+  }
+  .companies-strip::before { left: 0; background: linear-gradient(90deg, var(--surface), transparent); }
+  .companies-strip::after  { right: 0; background: linear-gradient(-90deg, var(--surface), transparent); }
+
+  /* particles canvas */
+  #particles {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <canvas id="particles"></canvas>
+  <div class="container position-relative" style="z-index:1;">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-7">
+        <div class="hero-tag anim-fade-up">
+          <i class="bi bi-mortarboard-fill"></i>
+          Campus Placement Portal — 2026
+        </div>
+        <h1 class="anim-fade-up anim-d1">
+          Land Your<br/>
+          <span class="highlight" id="typewriter">Dream Job</span><span class="typewriter-cursor"></span><br/>
+          Right Here
+        </h1>
+        <p class="anim-fade-up anim-d2">
+          Discover placement drives from top companies, apply in one click, track every round — from aptitude test to offer letter.
+        </p>
+        <div class="hero-cta anim-fade-up anim-d3">
+          <a href="{{ url_for('register') }}" class="btn-hero-primary">
+            <i class="bi bi-rocket-takeoff me-2"></i>Get Started Free
+          </a>
+          <a href="{{ url_for('drives') }}" class="btn-hero-secondary">
+            <i class="bi bi-briefcase me-2"></i>Browse Drives
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-5 d-none d-lg-block">
+        <div class="float-stats">
+          <div class="fstat anim-fade-up anim-d1">
+            <div class="fstat-icon" style="background:rgba(92,78,229,.2);">
+              <i class="bi bi-briefcase-fill" style="color:#a78bfa;"></i>
+            </div>
+            <div>
+              <div class="fstat-num">{{ drives }}</div>
+              <div class="fstat-label">Active Placement Drives</div>
+            </div>
+          </div>
+          <div class="fstat anim-fade-up anim-d2" style="margin-left:2rem;">
+            <div class="fstat-icon" style="background:rgba(16,185,129,.2);">
+              <i class="bi bi-patch-check-fill" style="color:#34d399;"></i>
+            </div>
+            <div>
+              <div class="fstat-num">{{ placed }}</div>
+              <div class="fstat-label">Students Placed</div>
+            </div>
+          </div>
+          <div class="fstat anim-fade-up anim-d3">
+            <div class="fstat-icon" style="background:rgba(245,158,11,.2);">
+              <i class="bi bi-building-fill" style="color:#fbbf24;"></i>
+            </div>
+            <div>
+              <div class="fstat-num">{{ companies }}</div>
+              <div class="fstat-label">Companies Registered</div>
+            </div>
+          </div>
+          <div class="fstat anim-fade-up anim-d4" style="margin-left:2rem;">
+            <div class="fstat-icon" style="background:rgba(59,130,246,.2);">
+              <i class="bi bi-people-fill" style="color:#60a5fa;"></i>
+            </div>
+            <div>
+              <div class="fstat-num">{{ students }}</div>
+              <div class="fstat-label">Registered Students</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GRADIENT LINE -->
+<div class="gradient-line"></div>
+
+<!-- HOW IT WORKS -->
+<section class="py-5 my-3">
+  <div class="container">
+    <div class="text-center mb-5 anim-fade-up">
+      <p style="color:var(--brand);font-weight:700;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;">Simple Process</p>
+      <h2 style="font-size:2rem;font-weight:800;margin-top:.5rem;">How PlaceIt Works</h2>
+    </div>
+    <div class="row g-4">
+      {% for icon, title, desc in [
+        ("bi-person-plus-fill", "Register & Build Profile", "Create your account, add your CGPA, branch and skills. Your profile auto-checks drive eligibility."),
+        ("bi-search-heart", "Discover Drives", "Browse all campus placement drives. See CTC, eligibility, dates — and apply in one click."),
+        ("bi-graph-up-arrow", "Track Every Round", "Follow your application from Applied → Shortlisted → Selected. See round-by-round results live."),
+        ("bi-envelope-check-fill", "Get Placed!", "Receive your offer, celebrate with your team. Your placement gets recorded in the system.")
+      ] %}
+      <div class="col-sm-6 col-lg-3">
+        <div class="card p-4 h-100 hover-lift anim-fade-up anim-d{{ loop.index }}">
+          <div class="step-num">
+            <i class="bi {{ icon }}"></i>
+          </div>
+          <h5 style="font-weight:700;margin-bottom:.6rem;">{{ title }}</h5>
+          <p style="color:var(--muted);font-size:.88rem;line-height:1.65;margin:0;">{{ desc }}</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- TPO CTA -->
+<section style="background:linear-gradient(135deg, var(--brand) 0%, #7c3aed 100%); padding:4rem 0; margin:3rem 0; position:relative; overflow:hidden;">
+  <div style="position:absolute;inset:0;background-image:radial-gradient(circle at 50% 50%, rgba(255,255,255,.06) 1px, transparent 1px);background-size:30px 30px;"></div>
+  <div class="container text-center position-relative">
+    <p class="anim-fade-up" style="color:rgba(255,255,255,.7);font-weight:600;font-size:.82rem;letter-spacing:2px;text-transform:uppercase;">For Placement Officers</p>
+    <h2 class="anim-fade-up anim-d1" style="color:#fff;font-size:2rem;font-weight:800;margin:.75rem 0 1rem;">Manage All Drives from One Dashboard</h2>
+    <p class="anim-fade-up anim-d2" style="color:rgba(255,255,255,.65);max-width:480px;margin:0 auto 2rem;font-size:1rem;">Post drives, track applicants, update statuses, and manage interview rounds — the complete TPO toolkit.</p>
+    <a href="{{ url_for('officer_login') }}" class="anim-fade-up anim-d3" style="background:#fff;color:var(--brand);font-weight:700;
+       font-size:.95rem;padding:.85rem 2rem;border-radius:var(--radius-sm);text-decoration:none;
+       transition:all .2s;display:inline-block;" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 24px rgba(0,0,0,.2)'" onmouseout="this.style.transform='';this.style.boxShadow=''">
+      <i class="bi bi-shield-check me-2"></i>TPO Portal →
+    </a>
+  </div>
+</section>
+
+{% endblock %}
+{% block extra_js %}
+<script>
+  // ── TYPEWRITER EFFECT ──────────────────────
+  const words = ['Dream Job', 'Future', 'Career', 'Success', 'Opportunity'];
+  const el = document.getElementById('typewriter');
+  let wordIndex = 0, charIndex = 0, isDeleting = false;
+
+  function typeWrite() {
+    const current = words[wordIndex];
+    if (!isDeleting) {
+      el.textContent = current.substring(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === current.length) {
+        isDeleting = true;
+        setTimeout(typeWrite, 2000);
+        return;
+      }
+      setTimeout(typeWrite, 100);
+    } else {
+      el.textContent = current.substring(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % words.length;
+      }
+      setTimeout(typeWrite, 50);
+    }
+  }
+  setTimeout(typeWrite, 2500);
+
+  // ── PARTICLE CANVAS ────────────────────────
+  const canvas = document.getElementById('particles');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+
+  function resizeCanvas() {
+    const hero = canvas.parentElement;
+    canvas.width = hero.offsetWidth;
+    canvas.height = hero.offsetHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor() {
+      this.reset();
+    }
+    reset() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.size = Math.random() * 2 + .5;
+      this.speedX = (Math.random() - .5) * .4;
+      this.speedY = (Math.random() - .5) * .4;
+      this.opacity = Math.random() * .3 + .1;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) {
+        this.reset();
+      }
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(167, 139, 250, ${this.opacity})`;
+      ctx.fill();
+    }
+  }
+
+  for (let i = 0; i < 60; i++) particles.push(new Particle());
+
+  function animateParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+</script>
+{% endblock %}

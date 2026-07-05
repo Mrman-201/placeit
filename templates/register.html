@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+{% block title %}Register — PlaceIt{% endblock %}
+{% block extra_css %}
+<style>
+  .register-bg {
+    min-height: 90vh;
+    display: flex;
+    align-items: center;
+    padding: 3rem 0;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8f7ff 0%, #ede9fe 50%, #e0e7ff 100%);
+  }
+  .register-bg::before {
+    content: '';
+    position: absolute;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(92,78,229,.12), transparent 70%);
+    top: -150px; right: -150px;
+    animation: float 8s ease-in-out infinite;
+  }
+  .register-bg::after {
+    content: '';
+    position: absolute;
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,158,11,.08), transparent 70%);
+    bottom: -100px; left: -100px;
+    animation: float 10s ease-in-out infinite reverse;
+  }
+  .validation-msg {
+    font-size: .78rem;
+    font-weight: 600;
+    margin-top: .3rem;
+    min-height: 1.1em;
+    transition: all .2s;
+  }
+  .validation-msg.error { color: #ef4444; }
+  .validation-msg.success { color: #10b981; }
+  .form-control.is-valid-custom {
+    border-color: #10b981 !important;
+    box-shadow: 0 0 0 3px rgba(16,185,129,.12) !important;
+  }
+  .form-control.is-invalid-custom {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239,68,68,.12) !important;
+  }
+  .strength-bar {
+    height: 4px; border-radius: 2px;
+    background: var(--border);
+    margin-top: .4rem;
+    overflow: hidden;
+  }
+  .strength-bar-fill {
+    height: 100%; border-radius: 2px;
+    transition: width .3s, background .3s;
+  }
+  .skill-chip {
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .45rem 1rem;
+    cursor: pointer;
+    transition: all .18s;
+    user-select: none;
+  }
+  .skill-chip:hover {
+    border-color: var(--brand);
+  }
+  .skill-chip.skill-selected {
+    background: var(--brand-light);
+    border-color: var(--brand);
+    color: var(--brand);
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="register-bg">
+  <div class="container position-relative">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="text-center mb-4 anim-fade-up">
+          <h2 style="font-size:1.8rem;font-weight:800;">Create your student account</h2>
+          <p style="color:var(--muted);">Join PlaceIt and never miss a placement drive</p>
+        </div>
+        <div class="card p-4 p-md-5 anim-fade-up anim-d2">
+          <form method="POST" id="registerForm" novalidate>
+            <div class="row g-4">
+              <div class="col-md-6">
+                <label class="form-label">Full Name</label>
+                <input name="name" id="regName" type="text" class="form-control" placeholder="Akash Kumar"
+                       pattern="^[A-Za-z\s]{2,}$" title="Letters and spaces only, min 2 characters" required/>
+                <div class="validation-msg" id="nameMsg"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email Address</label>
+                <input name="email" id="regEmail" type="email" class="form-control" placeholder="you@college.edu" required/>
+                <div class="validation-msg" id="emailMsg"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Password <span style="color:var(--muted);font-weight:400;font-size:.8rem;">(min 6 characters)</span></label>
+                <input name="password" id="regPassword" type="password" class="form-control" placeholder="Create a password" minlength="6" required/>
+                <div class="strength-bar"><div class="strength-bar-fill" id="pwdStrength"></div></div>
+                <div class="validation-msg" id="pwdMsg"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Phone Number <span style="color:var(--muted);font-weight:400;font-size:.8rem;">(exactly 10 digits)</span></label>
+                <input name="phone" id="regPhone" type="tel" class="form-control" placeholder="9876543210"
+                       pattern="[0-9]{10}" maxlength="10" title="Enter exactly 10 digits" required/>
+                <div class="validation-msg" id="phoneMsg"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Branch</label>
+                <select name="branch" id="regBranch" class="form-select" required>
+                  <option value="">Select your branch</option>
+                  <option>CSE</option><option>ISE</option><option>ECE</option>
+                  <option>EEE</option><option>AIML</option><option>MECH</option><option>CIVIL</option>
+                </select>
+                <div class="validation-msg" id="branchMsg"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Year</label>
+                <select name="year" id="regYear" class="form-select" required>
+                  <option value="">Select year</option>
+                  <option>1</option><option>2</option><option>3</option><option>4</option>
+                </select>
+                <div class="validation-msg" id="yearMsg"></div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">CGPA <span style="color:var(--muted);font-weight:400;font-size:.8rem;">(0.0 – 10.0)</span></label>
+                <input name="cgpa" id="regCgpa" type="number" step="0.1" min="0" max="10"
+                       class="form-control" placeholder="8.5" required/>
+                <div class="validation-msg" id="cgpaMsg"></div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Active Backlogs</label>
+                <input name="backlogs" id="regBacklogs" type="number" min="0"
+                       class="form-control" placeholder="0" value="0"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">City</label>
+                <input name="city" type="text" class="form-control" placeholder="Udupi"/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">State</label>
+                <input name="state" type="text" class="form-control" placeholder="Karnataka"/>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Skills <span style="color:var(--muted);font-weight:400;font-size:.8rem;">(select all that apply)</span></label>
+                <div class="row g-2 mt-1">
+                  {% for s in skills %}
+                  <div class="col-auto">
+                    <div class="skill-chip" onclick="this.classList.toggle('skill-selected'); this.querySelector('input').checked = !this.querySelector('input').checked;">
+                      <input type="checkbox" name="skills" value="{{ s.skill_id }}" style="display:none;">
+                      <span style="font-weight:600;font-size:.85rem;">{{ s.skill_name }}</span>
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="col-12 pt-2">
+                <button type="submit" class="btn-brand w-100 py-3" style="font-size:1rem;border-radius:var(--radius-sm);" id="submitBtn">
+                  <i class="bi bi-rocket-takeoff me-2"></i>Create Account
+                </button>
+              </div>
+            </div>
+          </form>
+          <p class="text-center mt-3 mb-0" style="color:var(--muted);">
+            Already registered? <a href="{{ url_for('login') }}" style="color:var(--brand);font-weight:600;">Log in here</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  // ── LIVE VALIDATION ────────────────────────
+  const validators = {
+    regName: {
+      msgEl: 'nameMsg',
+      validate(v) {
+        if (!v.trim()) return { ok: false, msg: 'Name is required' };
+        if (!/^[A-Za-z\s]{2,}$/.test(v)) return { ok: false, msg: 'Letters and spaces only, min 2 chars' };
+        return { ok: true, msg: '✓ Looks good' };
+      }
+    },
+    regEmail: {
+      msgEl: 'emailMsg',
+      validate(v) {
+        if (!v) return { ok: false, msg: 'Email is required' };
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return { ok: false, msg: 'Enter a valid email address' };
+        return { ok: true, msg: '✓ Valid email' };
+      }
+    },
+    regPhone: {
+      msgEl: 'phoneMsg',
+      validate(v) {
+        if (!v) return { ok: false, msg: 'Phone is required' };
+        if (!/^\d+$/.test(v)) return { ok: false, msg: 'Digits only' };
+        if (v.length !== 10) return { ok: false, msg: `${v.length}/10 digits — need exactly 10` };
+        return { ok: true, msg: '✓ Valid phone number' };
+      }
+    },
+    regCgpa: {
+      msgEl: 'cgpaMsg',
+      validate(v) {
+        if (!v) return { ok: false, msg: 'CGPA is required' };
+        const n = parseFloat(v);
+        if (isNaN(n) || n < 0 || n > 10) return { ok: false, msg: 'Must be between 0.0 and 10.0' };
+        return { ok: true, msg: '✓ Valid CGPA' };
+      }
+    }
+  };
+
+  // Attach listeners
+  Object.keys(validators).forEach(id => {
+    const el = document.getElementById(id);
+    const cfg = validators[id];
+    el.addEventListener('input', () => {
+      const result = cfg.validate(el.value);
+      const msgEl = document.getElementById(cfg.msgEl);
+      msgEl.textContent = result.msg;
+      msgEl.className = 'validation-msg ' + (result.ok ? 'success' : 'error');
+      el.classList.remove('is-valid-custom', 'is-invalid-custom');
+      el.classList.add(result.ok ? 'is-valid-custom' : 'is-invalid-custom');
+    });
+  });
+
+  // Phone: only allow digits
+  document.getElementById('regPhone').addEventListener('keypress', function(e) {
+    if (!/\d/.test(e.key) && e.key !== 'Backspace') e.preventDefault();
+  });
+
+  // Password strength
+  document.getElementById('regPassword').addEventListener('input', function() {
+    const v = this.value;
+    const bar = document.getElementById('pwdStrength');
+    const msgEl = document.getElementById('pwdMsg');
+    let score = 0;
+    if (v.length >= 6) score++;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/\d/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+
+    const pct = Math.min(score / 5 * 100, 100);
+    const colors = ['#ef4444', '#f59e0b', '#f59e0b', '#10b981', '#10b981'];
+    const labels = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+    bar.style.width = pct + '%';
+    bar.style.background = colors[Math.max(score - 1, 0)];
+
+    if (v.length < 6) {
+      msgEl.textContent = `Min 6 characters (${v.length}/6)`;
+      msgEl.className = 'validation-msg error';
+      this.classList.remove('is-valid-custom');
+      this.classList.add('is-invalid-custom');
+    } else {
+      msgEl.textContent = '✓ ' + labels[Math.min(score - 1, 4)];
+      msgEl.className = 'validation-msg success';
+      this.classList.remove('is-invalid-custom');
+      this.classList.add('is-valid-custom');
+    }
+  });
+
+  // Form submit validation
+  document.getElementById('registerForm').addEventListener('submit', function(e) {
+    let valid = true;
+    Object.keys(validators).forEach(id => {
+      const el = document.getElementById(id);
+      const result = validators[id].validate(el.value);
+      if (!result.ok) { valid = false; el.dispatchEvent(new Event('input')); }
+    });
+    const pwd = document.getElementById('regPassword');
+    if (pwd.value.length < 6) { valid = false; pwd.dispatchEvent(new Event('input')); }
+    const branch = document.getElementById('regBranch');
+    if (!branch.value) { valid = false; document.getElementById('branchMsg').textContent = 'Select a branch'; document.getElementById('branchMsg').className = 'validation-msg error'; }
+    const year = document.getElementById('regYear');
+    if (!year.value) { valid = false; document.getElementById('yearMsg').textContent = 'Select a year'; document.getElementById('yearMsg').className = 'validation-msg error'; }
+    if (!valid) e.preventDefault();
+  });
+</script>
+{% endblock %}

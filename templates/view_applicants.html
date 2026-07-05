@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Applicants — PlaceIt{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <a href="{{ url_for('officer_dashboard') }}" style="color:rgba(255,255,255,.5);text-decoration:none;font-size:.85rem;">
+      <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+    </a>
+    <h1 style="margin-top:.75rem;">{{ drive.role }}</h1>
+    <p>{{ drive.company_name }} &mdash; {{ applicants|length }} applicant{{ 's' if applicants|length != 1 }}</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Summary strip -->
+  <div class="row g-3 mb-4">
+    {% set selected_count = applicants|selectattr('status','eq','Selected')|list|length %}
+    {% set shortlisted_count = applicants|selectattr('status','eq','Shortlisted')|list|length %}
+    <div class="col-auto">
+      <div style="background:var(--brand-light);border-radius:var(--radius-sm);padding:.6rem 1.2rem;">
+        <span style="font-weight:700;color:var(--brand);">{{ applicants|length }} Total</span>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div style="background:#dbeafe;border-radius:var(--radius-sm);padding:.6rem 1.2rem;">
+        <span style="font-weight:700;color:#1d4ed8;">{{ shortlisted_count }} Shortlisted</span>
+      </div>
+    </div>
+    <div class="col-auto">
+      <div style="background:#d1fae5;border-radius:var(--radius-sm);padding:.6rem 1.2rem;">
+        <span style="font-weight:700;color:#065f46;">{{ selected_count }} Selected</span>
+      </div>
+    </div>
+  </div>
+
+  {% if applicants %}
+  <div class="table-wrapper">
+    <table class="table styled-table table-hover">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Branch</th>
+          <th>CGPA</th>
+          <th>Backlogs</th>
+          <th>Applied On</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in applicants %}
+        <tr>
+          <td style="color:var(--muted);">{{ loop.index }}</td>
+          <td>
+            <div style="font-weight:700;">{{ a.name }}</div>
+            <div style="color:var(--muted);font-size:.8rem;">{{ a.email }}</div>
+          </td>
+          <td>
+            <span class="branch-tag">{{ a.branch }}</span>
+          </td>
+          <td>
+            <span style="font-weight:700;{% if a.cgpa >= 8.5 %}color:#065f46;{% elif a.cgpa >= 7.0 %}color:#b45309;{% else %}color:#991b1b;{% endif %}">
+              {{ a.cgpa }}
+            </span>
+          </td>
+          <td style="text-align:center;">
+            <span style="{% if a.backlogs > 0 %}color:#991b1b;font-weight:700;{% else %}color:var(--muted);{% endif %}">
+              {{ a.backlogs }}
+            </span>
+          </td>
+          <td style="color:var(--muted);font-size:.85rem;">{{ a.applied_date }}</td>
+          <td>
+            {% set sc = a.status|lower|replace(' ','-') %}
+            <span class="status-badge s-{{ sc }}">{{ a.status }}</span>
+          </td>
+          <td>
+            <a href="{{ url_for('application_detail', app_id=a.application_id) }}"
+               class="btn-ghost" style="padding:.35rem .85rem;font-size:.8rem;text-decoration:none;border-radius:var(--radius-sm);">
+              Manage
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card p-5 text-center">
+    <i class="bi bi-inbox" style="font-size:3rem;color:var(--border);"></i>
+    <h5 style="margin-top:1rem;font-weight:700;">No applications yet</h5>
+    <p style="color:var(--muted);">Students haven't applied to this drive yet.</p>
+  </div>
+  {% endif %}
+
+  <!-- SELECTION ROUNDS -->
+  <div class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 style="font-weight:800;margin:0;">
+        <i class="bi bi-layers me-2" style="color:var(--accent);"></i>Selection Rounds
+      </h4>
+    </div>
+
+    {% if rounds %}
+    <div class="row g-3 mb-4">
+      {% for r in rounds %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card p-3 hover-lift">
+          <div class="d-flex align-items-center gap-3">
+            <div style="width:44px;height:44px;border-radius:10px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="bi bi-clipboard-check" style="color:var(--brand);font-size:1.1rem;"></i>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:.92rem;">{{ r.round_name }}</div>
+              <div style="color:var(--muted);font-size:.78rem;">
+                <span style="background:#f3f4f6;padding:.1em .4em;border-radius:4px;margin-right:.3rem;">{{ r.round_type }}</span>
+                {{ r.round_date }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:var(--muted);margin-bottom:1rem;">No rounds added yet. Add your first round below.</p>
+    {% endif %}
+
+    <!-- Add Round Form -->
+    <div class="card p-4">
+      <h5 style="font-weight:700;margin-bottom:1rem;">
+        <i class="bi bi-plus-circle me-2" style="color:var(--brand);"></i>Add New Round
+      </h5>
+      <form method="POST" action="{{ url_for('add_round', drive_id=drive_id) }}">
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label">Round Name</label>
+            <input name="round_name" type="text" class="form-control"
+                   placeholder="e.g. Technical Round 1" required/>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Round Type</label>
+            <select name="round_type" class="form-select" required>
+              <option value="Aptitude">Aptitude</option>
+              <option value="Technical" selected>Technical</option>
+              <option value="HR">HR</option>
+              <option value="Group Discussion">Group Discussion</option>
+              <option value="Case Study">Case Study</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Round Date</label>
+            <input name="round_date" type="date" class="form-control" required/>
+          </div>
+          <div class="col-md-2">
+            <button type="submit" class="btn-brand w-100" style="padding:.6rem;">
+              <i class="bi bi-plus-lg me-1"></i>Add
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

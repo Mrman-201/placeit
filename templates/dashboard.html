@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — PlaceIt{% endblock %}
+{% block content %}
+
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item active">Dashboard</li></ol></nav>
+    <h1>Good to see you, {{ session.student_name.split()[0] }} 👋</h1>
+    <p>Here's your placement activity at a glance</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- STATS -->
+  <div class="row g-4 mb-5">
+    <div class="col-6 col-lg-3">
+      <div class="stat-card sc-purple anim-fade-up anim-d1">
+        <div class="stat-num">{{ total }}</div>
+        <div class="stat-label">Applied</div>
+        <i class="bi bi-send stat-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card sc-blue anim-fade-up anim-d2">
+        <div class="stat-num">{{ shortlisted }}</div>
+        <div class="stat-label">Shortlisted</div>
+        <i class="bi bi-bookmark-star stat-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card sc-amber anim-fade-up anim-d3">
+        <div class="stat-num">{{ inprocess }}</div>
+        <div class="stat-label">In Process</div>
+        <i class="bi bi-hourglass-split stat-icon"></i>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="stat-card sc-green anim-fade-up anim-d4">
+        <div class="stat-num">{{ selected }}</div>
+        <div class="stat-label">Selected 🎉</div>
+        <i class="bi bi-patch-check stat-icon"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUICK ACTIONS -->
+  <div class="row g-3 mb-5">
+    <div class="col-12">
+      <h4 style="font-weight:800;">Quick Actions</h4>
+    </div>
+    <div class="col-md-4">
+      <a href="{{ url_for('drives') }}" class="card p-4 d-flex flex-row align-items-center gap-3 text-decoration-none hover-lift anim-fade-up anim-d2">
+        <div style="width:52px;height:52px;border-radius:12px;background:var(--brand-light);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi bi-briefcase-fill" style="color:var(--brand);font-size:1.3rem;"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem;color:var(--text);">Browse Drives</div>
+          <div style="color:var(--muted);font-size:.82rem;margin-top:.15rem;">Find new opportunities</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto" style="color:var(--muted);"></i>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{{ url_for('my_applications') }}" class="card p-4 d-flex flex-row align-items-center gap-3 text-decoration-none hover-lift anim-fade-up anim-d3">
+        <div style="width:52px;height:52px;border-radius:12px;background:#d1fae5;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi bi-file-text-fill" style="color:#065f46;font-size:1.3rem;"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem;color:var(--text);">My Applications</div>
+          <div style="color:var(--muted);font-size:.82rem;margin-top:.15rem;">Track your progress</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto" style="color:var(--muted);"></i>
+      </a>
+    </div>
+    <div class="col-md-4">
+      <a href="{{ url_for('profile') }}" class="card p-4 d-flex flex-row align-items-center gap-3 text-decoration-none hover-lift anim-fade-up anim-d4">
+        <div style="width:52px;height:52px;border-radius:12px;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <i class="bi bi-person-badge-fill" style="color:#b45309;font-size:1.3rem;"></i>
+        </div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem;color:var(--text);">My Profile</div>
+          <div style="color:var(--muted);font-size:.82rem;margin-top:.15rem;">View GPA & skills</div>
+        </div>
+        <i class="bi bi-arrow-right ms-auto" style="color:var(--muted);"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- RECENT APPLICATIONS -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 style="font-weight:800;margin:0;">Recent Applications</h4>
+    <a href="{{ url_for('my_applications') }}" style="color:var(--brand);font-weight:600;font-size:.88rem;text-decoration:none;">View all →</a>
+  </div>
+
+  {% if recent %}
+  <div class="table-wrapper anim-fade-up anim-d3">
+    <table class="table styled-table table-hover">
+      <thead>
+        <tr>
+          <th>Role & Company</th>
+          <th>CTC</th>
+          <th>Applied On</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in recent %}
+        <tr>
+          <td>
+            <div style="font-weight:700;">{{ a.role }}</div>
+            <div style="color:var(--muted);font-size:.82rem;">{{ a.company_name }}</div>
+          </td>
+          <td style="font-weight:700;color:#065f46;">₹{{ "{:,.0f}".format(a.ctc) }}</td>
+          <td style="color:var(--muted);">{{ a.applied_date }}</td>
+          <td>
+            {% set sc = a.status|lower|replace(' ','-') %}
+            <span class="status-badge s-{{ sc }}">{{ a.status }}</span>
+          </td>
+          <td>
+            <a href="{{ url_for('application_detail', app_id=a.application_id) }}"
+               class="btn-ghost btn-sm" style="padding:.3rem .85rem;font-size:.8rem;">
+              View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card p-5 text-center anim-fade-up anim-d3">
+    <i class="bi bi-briefcase" style="font-size:3rem;color:var(--border);"></i>
+    <h5 style="margin-top:1rem;font-weight:700;">No applications yet</h5>
+    <p style="color:var(--muted);">Start by browsing available placement drives.</p>
+    <a href="{{ url_for('drives') }}" class="btn-brand" style="width:fit-content;margin:0 auto;">Browse Drives</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
