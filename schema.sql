@@ -120,8 +120,14 @@ CREATE TABLE Applications (
     student_id      INT  NOT NULL,
     drive_id        INT  NOT NULL,
     applied_date    DATE NOT NULL DEFAULT (CURRENT_DATE),
-    status          ENUM('Applied','Shortlisted','In Process','Selected','Rejected','Withdrawn')
-                    NOT NULL DEFAULT 'Applied',
+    `status` ENUM(
+    'Applied',
+    'Shortlisted',
+    'In Process',
+    'Selected',
+    'Rejected',
+    'Withdrawn'
+) NOT NULL DEFAULT 'Applied',
 
     -- one student cannot apply to the same drive twice
     CONSTRAINT uq_application UNIQUE (student_id, drive_id),
