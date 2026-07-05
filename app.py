@@ -125,6 +125,11 @@ def register():
 
 @app.route("/login", methods=["GET","POST"])
 def login():
+    # Redirect already-authenticated users to their dashboard
+    if session.get("role") == "student":
+        return redirect(url_for("dashboard"))
+    if session.get("role") == "officer":
+        return redirect(url_for("officer_dashboard"))
     if request.method == "POST":
         db = get_db(); cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM Students WHERE email=%s AND password=%s",
@@ -363,6 +368,11 @@ def update_round(round_id, student_id):
 # ── OFFICER AUTH ─────────────────────────────────
 @app.route("/officer/login", methods=["GET","POST"])
 def officer_login():
+    # Redirect already-authenticated users to their dashboard
+    if session.get("role") == "officer":
+        return redirect(url_for("officer_dashboard"))
+    if session.get("role") == "student":
+        return redirect(url_for("dashboard"))
     if request.method == "POST":
         db = get_db(); cur = db.cursor(dictionary=True)
         cur.execute("SELECT * FROM Placement_Officers WHERE email=%s AND password=%s",
