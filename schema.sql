@@ -244,6 +244,10 @@ BEGIN
 END$$
 
 -- STORED PROCEDURE: Update status & auto-withdraw others on selection
+DROP PROCEDURE IF EXISTS sp_update_status;
+
+DELIMITER $$
+
 CREATE PROCEDURE sp_update_status(
     IN p_application_id INT,
     IN p_new_status VARCHAR(50)
